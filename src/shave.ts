@@ -10,9 +10,9 @@ export type Opts = {
   link?: Link
 }
 
-function generateArrayOfNodes(target: string | NodeList): Array<Node> {
+function generateArrayOfNodes(target: string | NodeList, localDocument: Document): Array<Node> {
   if (typeof target === 'string') {
-    return [...document.querySelectorAll(target)]
+    return [...localDocument.querySelectorAll(target)]
   } else if ('length' in target) {
     return [...target]
   } else {
@@ -20,11 +20,12 @@ function generateArrayOfNodes(target: string | NodeList): Array<Node> {
   }
 }
 
-export default function shave(target: string | NodeList, maxHeight: number, opts: Opts = {}): void {
+export default function shave(target: string | NodeList, maxHeight: number, opts: Opts = {}, localDocument: Document): void {
+  localDocument = localDocument || document;
   if (typeof maxHeight === 'undefined' || isNaN(maxHeight)) {
     throw Error('maxHeight is required')
   }
-  const els = generateArrayOfNodes(target)
+  const els = generateArrayOfNodes(target, localDocument)
 
   if (!els.length) {
     return
@@ -91,7 +92,7 @@ export default function shave(target: string | NodeList, maxHeight: number, opts
     }
 
     const textContent = isLink && link.textContent ? link.textContent : character
-    const shavedTextEl = document.createElement(shavedTextElType)
+    const shavedTextEl = localDocument.createElement(shavedTextElType)
     const shavedTextElAttributes = {
       className: charclassname,
       textContent,
@@ -131,8 +132,8 @@ export default function shave(target: string | NodeList, maxHeight: number, opts
       ? ` ${(words.slice(max) as string[]).join(' ') as string}`
       : (words as string).slice(max)
 
-    const shavedText = document.createTextNode(diff)
-    const elWithShavedText = document.createElement('span')
+    const shavedText = localDocument.createTextNode(diff)
+    const elWithShavedText = localDocument.createElement('span')
     elWithShavedText.classList.add(classname)
     elWithShavedText.style.display = 'none'
     elWithShavedText.appendChild(shavedText)
